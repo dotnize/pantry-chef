@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["unicorn", "typescript", "oxc", "eslint", "node"],
+  "env": {
+    "builtin": true,
+    "node": true
+  },
+  "options": {
+    "typeAware": true,
+    "typeCheck": true
+  },
+  "rules": {
+    "no-deprecated": "warn"
+  },
+  "ignorePatterns": [
+    "dist",
+    ".wrangler",
+    ".vercel",
+    ".netlify",
+    ".output",
+    "build/",
+    "worker-configuration.d.ts",
+    "scripts/"
+  ]
+}

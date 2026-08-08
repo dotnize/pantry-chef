@@ -1,0 +1,49 @@
+{
+  "name": "pantry-chef",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A Discord bot for The Pantry community.",
+  "license": "MIT",
+  "author": "Nathaniel John Tampus <nat@nize.ph>",
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/index.ts",
+    "dev": "node --env-file-if-exists=.env --watch src/index.ts",
+    "commands:deploy": "node --env-file-if-exists=.env src/deploy-commands.ts",
+    "prepare": "husky",
+    "lint": "oxlint --type-aware --type-check",
+    "lint:fix": "oxlint --type-aware --type-check --fix",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "check": "pnpm format && pnpm lint",
+    "deps": "pnpm dlx taze@latest -Ilw --maturity-period 3"
+  },
+  "dependencies": {
+    "discord.js": "14.27.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.1.2",
+    "husky": "9.1.7",
+    "lint-staged": "17.3.0",
+    "oxfmt": "0.62.0",
+    "oxlint": "1.77.0",
+    "oxlint-tsgolint": "7.0.2001",
+    "typescript": "7.0.2"
+  },
+  "lint-staged": {
+    "*": "oxfmt --no-error-on-unmatched-pattern"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.20.0",
+      "onFail": "download"
+    }
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
