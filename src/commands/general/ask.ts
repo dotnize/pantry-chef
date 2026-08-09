@@ -41,9 +41,8 @@ async function askChef(prompt: string): Promise<string> {
 function buildResponseEmbed(description: string): EmbedBuilder {
   return new EmbedBuilder()
     .setColor(responseColor)
-    .setTitle("🍳 Pantry Chef")
-    .setDescription(fitEmbedDescription(description))
-    .setFooter({ text: "Fresh from The Pantry" });
+    .setTitle("🍳 The Chef")
+    .setDescription(fitEmbedDescription(description));
 }
 
 function buildErrorEmbed(): EmbedBuilder {
