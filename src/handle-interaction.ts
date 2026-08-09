@@ -18,7 +18,7 @@ export async function handleInteraction(
   }
 
   try {
-    await command.execute(interaction);
+    await command.execute(interaction, commandRegistry);
   } catch (error) {
     console.error(`Failed to execute /${interaction.commandName}:`, error);
 

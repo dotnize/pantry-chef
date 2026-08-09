@@ -5,7 +5,7 @@ A Discord bot for The Pantry community, built with discord.js and TypeScript.
 ## Set up
 
 1. Install dependencies with `pnpm install`.
-2. Copy `.env.example` to `.env` and fill in your bot token and application ID.
+2. Copy `.env.example` to `.env` and fill in your bot token, application ID, and Gemini AI API key.
 3. During development, set `DISCORD_GUILD_ID` so command updates deploy to one server quickly.
 4. Run `pnpm commands:deploy` whenever a command definition changes.
 5. Run `pnpm dev` to start the bot with Node's watch mode.
@@ -15,12 +15,33 @@ checks.
 
 ## Adding a command
 
-Add a `.ts` file to `src/commands` and default-export a command created with `defineCommand` from
-`#/lib/commands.ts`. Command modules are discovered automatically when the bot starts and when
-commands are deployed, so no registry import needs to be updated manually.
+Add a `.ts` file one level below `src/commands`, such as `src/commands/general/ping.ts`, and
+default-export a command created with `defineCommand` from `#/lib/commands.ts`. Command modules are
+discovered automatically when the bot starts and when commands are deployed, so no registry import
+needs to be updated manually. The immediate folder name is the command's category and is displayed
+in uppercase by `/help`.
 
-Keep support code outside `src/commands`: every TypeScript file in that directory is treated as a
-command module.
+Keep support code outside `src/commands`: every TypeScript file directly inside a category folder is
+treated as a command module. Nested category folders are not scanned.
+
+## Reaction roles
+
+Replace the channel and role ID placeholders in
+`src/features/reaction-roles/config.ts`, then deploy the commands and run
+`/reaction-roles`. The command creates one managed message per enabled panel and updates those
+same messages on future runs.
+
+The bot requires View Channel, Send Messages, Embed Links, Read Message History, Add Reactions, and
+Manage Roles in the configured channel. Its highest role must be above every role it assigns.
+
+`/embed create` creates a simple markdown-enabled embed. `/embed edit` edits an embed in the current
+channel by default; select the optional channel argument when the message is elsewhere.
+
+## Server information
+
+Replace the channel ID placeholder and edit the markdown in `src/features/server-info/config.ts`,
+then run `/server-info`. The command creates the managed server info embed or updates the
+existing one when the hardcoded markdown changes.
 
 ## License
 

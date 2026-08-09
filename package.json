@@ -12,20 +12,23 @@
   "scripts": {
     "start": "node --env-file-if-exists=.env src/index.ts",
     "dev": "node --env-file-if-exists=.env --watch src/index.ts",
-    "commands:deploy": "node --env-file-if-exists=.env src/deploy-commands.ts",
+    "deploy-cmds": "node --env-file-if-exists=.env src/deploy-commands.ts",
     "prepare": "husky",
     "lint": "oxlint --type-aware --type-check",
     "lint:fix": "oxlint --type-aware --type-check --fix",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "check": "pnpm format && pnpm lint",
-    "deps": "pnpm dlx taze@latest -Ilw --maturity-period 3"
+    "deps": "pnpm dlx taze@latest -Ilw --maturity-period 3",
+    "intent": "pnpm dlx @tanstack/intent@latest"
   },
   "dependencies": {
+    "@tanstack/ai": "0.43.1",
+    "@tanstack/ai-gemini": "0.21.0",
     "discord.js": "14.27.0"
   },
   "devDependencies": {
-    "@types/node": "26.1.2",
+    "@types/node": "26.2.0",
     "husky": "9.1.7",
     "lint-staged": "17.3.0",
     "oxfmt": "0.62.0",
@@ -45,5 +48,10 @@
   },
   "engines": {
     "node": ">=24"
+  },
+  "intent": {
+    "skills": [
+      "@tanstack/*"
+    ]
   }
 }

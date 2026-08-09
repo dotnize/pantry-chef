@@ -2,15 +2,22 @@ import { readdir } from "node:fs/promises";
 
 import type { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 
-export interface Command {
+export interface CommandDefinition {
   readonly data: Pick<SlashCommandBuilder, "name" | "toJSON">;
-  execute(interaction: ChatInputCommandInteraction): Promise<void>;
+  execute(
+    interaction: ChatInputCommandInteraction,
+    commandRegistry: CommandRegistry,
+  ): Promise<void>;
+}
+
+export interface Command extends CommandDefinition {
+  readonly category: string;
 }
 
 /**
  * Defines a command while contextually typing its execute callback.
  */
-export function defineCommand(command: Command): Command {
+export function defineCommand(command: CommandDefinition): CommandDefinition {
   return command;
 }
 
@@ -18,12 +25,12 @@ export type CommandRegistry = ReadonlyMap<string, Command>;
 
 const commandsDirectory = new URL("../commands/", import.meta.url);
 
-function isCommand(value: unknown): value is Command {
+function isCommandDefinition(value: unknown): value is CommandDefinition {
   if (typeof value !== "object" || value === null) {
     return false;
   }
 
-  const command = value as Partial<Command>;
+  const command = value as Partial<CommandDefinition>;
 
   return (
     typeof command.data?.name === "string" &&
@@ -33,26 +40,40 @@ function isCommand(value: unknown): value is Command {
 }
 
 /**
- * Loads every command module in src/commands. Each module must default-export a command.
+ * Loads command modules one level below src/commands. The containing directory is the category.
  */
 export async function loadCommands(): Promise<readonly Command[]> {
-  const entries = await readdir(commandsDirectory, { withFileTypes: true });
-  const commandFiles = entries
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".ts"))
+  const categoryDirectories = (await readdir(commandsDirectory, { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory())
     .sort((left, right) => left.name.localeCompare(right.name));
 
-  const commands = await Promise.all(
-    commandFiles.map(async (file) => {
-      const commandUrl = new URL(file.name, commandsDirectory);
-      const commandModule = (await import(commandUrl.href)) as { default?: unknown };
+  const commandsByCategory = await Promise.all(
+    categoryDirectories.map(async (directory) => {
+      const categoryDirectory = new URL(`${directory.name}/`, commandsDirectory);
+      const commandFiles = (await readdir(categoryDirectory, { withFileTypes: true }))
+        .filter((entry) => entry.isFile() && entry.name.endsWith(".ts"))
+        .sort((left, right) => left.name.localeCompare(right.name));
 
-      if (!isCommand(commandModule.default)) {
-        throw new TypeError(`${file.name} must default-export a valid command.`);
-      }
+      return Promise.all(
+        commandFiles.map(async (file): Promise<Command> => {
+          const commandUrl = new URL(file.name, categoryDirectory);
+          const commandModule = (await import(commandUrl.href)) as { default?: unknown };
 
-      return commandModule.default;
+          if (!isCommandDefinition(commandModule.default)) {
+            throw new TypeError(
+              `${directory.name}/${file.name} must default-export a valid command.`,
+            );
+          }
+
+          return {
+            ...commandModule.default,
+            category: directory.name.toUpperCase(),
+          };
+        }),
+      );
     }),
   );
+  const commands = commandsByCategory.flat();
 
   // Validate duplicate names for every consumer, including the deployment script.
   createCommandRegistry(commands);
